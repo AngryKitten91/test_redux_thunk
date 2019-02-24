@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import './App.css';
+import { resolve } from 'path';
+import { reject } from 'q';
 
 class App extends Component {
 
@@ -10,12 +12,18 @@ class App extends Component {
     add(1);
   }
 
+  handleAsyncInc = () =>{
+    const { asyncAdd } = this.props;
+    asyncAdd(1);
+  }
+
 
   render() {
     const { sum } = this.props;
     return (
       <div className="App">
-        <p onClick={this.handleIncrement}>Click</p>
+        <p onClick={this.handleIncrement}>Sync Click</p>
+        <p onClick={this.handleAsyncInc}>Async Click</p>
         <p>{sum}</p>
       </div>
     );
@@ -29,6 +37,28 @@ const createAction = (data) => ({
   payload: data,
 });
 
+const asyncFunc = () =>{
+  return new Promise((resolve, reject)=>{
+    setTimeout(()=>{
+      resolve(123)
+    }, 3000)
+  })
+}
+
+asyncFunc().then((resp)=>{
+  console.log(resp);
+  
+})
+
+
+const createAsyncActionInc = (data) => {
+  return (dispatch)=>{
+    asyncFunc().then(()=>{
+      dispatch(createAction(data));
+    })
+  }
+}
+
 const mapStateToProps = state => {
   return {
     sum: state.reducer,
@@ -38,6 +68,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   add: (data) => {
     dispatch(createAction(data));
+  },
+  asyncAdd: (data) => {
+    dispatch(createAsyncActionInc(data));
   }
 });
 
