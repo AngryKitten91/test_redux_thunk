@@ -2,29 +2,44 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import './App.css';
-import { resolve } from 'path';
-import { reject } from 'q';
 
 class App extends Component {
 
   handleIncrement = () => {
-    const { add } = this.props;
+    const { add, } = this.props;
     add(1);
   }
 
-  handleAsyncInc = () =>{
+  handleAsyncInc = () => {
     const { asyncAdd } = this.props;
     asyncAdd(1);
   }
 
+  handleAsyncPosts = ()=>{
+    const { asyncPosts } = this.props;
+    asyncPosts()
+  }
+
+  componentDidMount(){
+    this.handleAsyncPosts()
+  }
 
   render() {
-    const { sum } = this.props;
+    const { sum, posts } = this.props;
     return (
       <div className="App">
         <p onClick={this.handleIncrement}>Sync Click</p>
         <p onClick={this.handleAsyncInc}>Async Click</p>
         <p>{sum}</p>
+        {posts && posts.map(({ userId, title, body }, i) => {
+          return (
+            <div key={i} className="posts">
+              <h3>{title}</h3>
+              <p>{userId}</p>
+              <p>{body}</p>
+            </div>
+          )
+        })}
       </div>
     );
   }
@@ -37,23 +52,33 @@ const createAction = (data) => ({
   payload: data,
 });
 
-const asyncFunc = () =>{
-  return new Promise((resolve, reject)=>{
-    setTimeout(()=>{
+const addPosts = (data) => ({
+  type: "POSTS",
+  payload: data,
+});
+
+const asyncFunc = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
       resolve(123)
-    }, 3000)
+    }, 2000)
   })
 }
 
-asyncFunc().then((resp)=>{
-  console.log(resp);
-  
-})
+const getAsyncData = () => {
+  return (dispatch) =>{
+    fetch('https://jsonplaceholder.typicode.com/posts/')
+    .then(resp=> resp.json())
+    .then((resp)=>{
+      dispatch(addPosts(resp))
+    })
+  }
+}
 
 
 const createAsyncActionInc = (data) => {
-  return (dispatch)=>{
-    asyncFunc().then(()=>{
+  return (dispatch) => {
+    asyncFunc().then(() => {
       dispatch(createAction(data));
     })
   }
@@ -62,6 +87,7 @@ const createAsyncActionInc = (data) => {
 const mapStateToProps = state => {
   return {
     sum: state.reducer,
+    posts: state.reducer2
   }
 };
 
@@ -71,7 +97,10 @@ const mapDispatchToProps = dispatch => ({
   },
   asyncAdd: (data) => {
     dispatch(createAsyncActionInc(data));
-  }
+  },
+  asyncPosts: (data) => {
+    dispatch(getAsyncData());
+  },
 });
 
 export default connect(

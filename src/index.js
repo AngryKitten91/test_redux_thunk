@@ -22,13 +22,13 @@ const reducer = (state = 0, action) => {
     }
 }
 
-const reducer2 = (state = 5, action) => {
-    const { type } = action;
-    switch (action.type) {
-        case 'SAVE_POSTS':
-            return {
-                ...state,
-            }
+const reducer2 = (state = [], action) => {
+    const { type, payload } = action;
+    switch (type) {
+        case 'POSTS':
+            return [
+                ...payload
+            ]
 
         default:
             return state;
