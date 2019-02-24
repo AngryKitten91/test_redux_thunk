@@ -28,8 +28,30 @@ const reducer2 = (state = [], action) => {
         case 'POSTS':
             return [
                 ...payload
-            ]
+            ];
+        default:
+            return state;
+    }
+}
 
+const actions = (state = {}, action) => {
+    const { type, payload } = action;
+    switch (type) {
+        case 'POSTS_PENDING':
+            return {
+                ...state,
+                [type]:payload
+            }
+        case 'POSTS_SUCCESS':
+            return { 
+                ...state,
+                [type]: payload
+            }
+        case 'POSTS_ERROR':
+            return {
+                ...state,
+                [type]: payload
+            }
         default:
             return state;
     }
@@ -39,7 +61,8 @@ const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DE
 
 const rootReducer = combineReducers({
     reducer,
-    reducer2
+    reducer2,
+    actions
 })
 
 const store = createStore(
