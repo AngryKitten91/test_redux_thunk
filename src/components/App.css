@@ -1,7 +1,43 @@
+.App {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .posts {
     background-color: rgb(240, 240, 240);
     color: black;
     padding: 30px;
     margin: 30px;
     border-radius: 30px;
+}
+
+.comments {
+    background-color: rgb(233, 233, 233);
+    color: black;
+    padding: 30px;
+    margin: 30px 30px 30px 60px;
+    /* border-radius: 30px; */
+    border-left: 8px solid rgb(180, 180, 180);
+    position: relative;
+
+}
+
+.comments:before {
+    font-weight: 700;
+    font-size: 100px;
+    content: '“';
+    position: absolute;
+    top: 0;
+    left: -70px;
+    color: rgb(180, 180, 180);
+    z-index: 999;
+
+}
+
+.email {
+    margin: 20px 20px 20px 0;
+}
+
+.title{
+    text-transform: uppercase;
 }

@@ -15,28 +15,50 @@ class App extends Component {
     asyncAdd(1);
   }
 
-  handleAsyncPosts = ()=>{
+  handleAsyncPosts = () => {
     const { asyncPosts } = this.props;
     asyncPosts()
   }
 
-  componentDidMount(){
-    this.handleAsyncPosts()
+  handleAsyncComments = () => {
+    const { asyncComments } = this.props;
+    asyncComments()
+  }
+
+  handleUsers = () =>{
+    const {asyncUsers} = this.props
+    asyncUsers()
+  }
+
+  componentDidMount() {
+    this.handleAsyncPosts();
+    this.handleAsyncComments();
+    this.handleUsers();
   }
 
   render() {
-    const { sum, posts } = this.props;
+    const { sum, posts, postsAndComments } = this.props;
     return (
       <div className="App">
         <p onClick={this.handleIncrement}>Sync Click</p>
         <p onClick={this.handleAsyncInc}>Async Click</p>
         <p>{sum}</p>
-        {posts && posts.map(({ userId, title, body }, i) => {
+        {postsAndComments && postsAndComments.map(({ userId, title, body, comments, userData:{name}='' }, i) => {
           return (
             <div key={i} className="posts">
-              <h3>{title}</h3>
-              <p>{userId}</p>
-              <p>{body}</p>
+              <h3>{title && title}</h3>
+              <p>{name && name}</p>
+              <p>{body && body}</p>
+              {comments && comments.map((comment, key) => {
+                const {body, email, name, id} = comment;
+                return (
+                  <div className="comments" key={key}>
+                    <h4>{name && name}</h4>
+                    <div className="email">{email && email}</div>
+                    <div>{body && body}</div>
+                  </div>
+                );
+              })}
             </div>
           )
         })}
@@ -79,27 +101,53 @@ const asyncFunc = () => {
   })
 }
 
-const fetchPosts = ()=>{
-  return fetch('https://jsonplaceholder.typicode.com/posts/')
+const fetchPosts = (url = 'https://jsonplaceholder.typicode.com/posts/') => {
+  return fetch(url)
     .then(resp => resp.json())
 }
 
+const getAsyncPosts = () => {
+  return (dispatch) => {
+    fetchPosts('https://jsonplaceholder.typicode.com/comments/')
+      .then((resp) => {
+        dispatch({
+          type: "COMMENTS",
+          payload: resp
+        })
+      })
+  }
+}
+
+const getAsyngetAsyncUsers = () => {
+  return (dispatch) => {
+    fetchPosts('https://jsonplaceholder.typicode.com/users/')
+      .then((resp) => {
+        dispatch({
+          type: "USERS",
+          payload: resp
+        })
+      })
+  }
+}
+
+
+
 const getAsyncData = () => {
-  return (dispatch) =>{
+  return (dispatch) => {
     dispatch(posts_pending(true));
     fetchPosts()
-    .then((resp)=>{
-      dispatch(addPosts(resp))
-      dispatch(posts_pending(false));
-      dispatch(posts_succ(true));
-      return resp;
-    })
-    .catch((err)=>{
-      dispatch(posts_err(true));
-      dispatch(posts_succ(false));
-      dispatch(posts_pending(false));
-    })
-    
+      .then((resp) => {
+        dispatch(addPosts(resp))
+        dispatch(posts_pending(false));
+        dispatch(posts_succ(true));
+        return resp;
+      })
+      .catch((err) => {
+        dispatch(posts_err(true));
+        dispatch(posts_succ(false));
+        dispatch(posts_pending(false));
+      })
+
   }
 }
 
@@ -112,12 +160,27 @@ const createAsyncActionInc = (data) => {
   }
 }
 
+const selectorCommentstoPosts = (state) => {
+  const { reducer2, reducer3, reducer4 } = state;
+  
+  const CommentswithPosts = reducer2.map(elem => {
+    const {id, userId} = elem;
+    const userData = reducer4.find(user => user.id === userId)
+    const commentsWithId = reducer3.filter(comment => comment.postId === id)
+    elem.comments = commentsWithId;
+    elem.userData = userData;
+    return elem;
+  })
+
+  return CommentswithPosts;
+}
 
 // STATE TO PROPS
 const mapStateToProps = state => {
   return {
     sum: state.reducer,
-    posts: state.reducer2
+    posts: state.reducer2,
+    postsAndComments: selectorCommentstoPosts(state)
   }
 };
 
@@ -132,6 +195,12 @@ const mapDispatchToProps = dispatch => ({
   asyncPosts: (data) => {
     dispatch(getAsyncData());
   },
+  asyncComments: (data) => {
+    dispatch(getAsyncPosts())
+  },
+  asyncUsers: (data) => {
+    dispatch(getAsyngetAsyncUsers())
+  }
 });
 
 

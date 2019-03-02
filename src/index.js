@@ -33,6 +33,34 @@ const reducer2 = (state = [], action) => {
             return state;
     }
 }
+const reducer3 = (state = [], action) => {
+    const {
+        type,
+        payload
+    } = action;
+    switch (type) {
+        case 'COMMENTS':
+            return [
+                ...payload
+            ];
+        default:
+            return state;
+    }
+}
+const reducer4 = (state = [], action) => {
+    const {
+        type,
+        payload
+    } = action;
+    switch (type) {
+        case 'USERS':
+            return [
+                ...payload
+            ];
+        default:
+            return state;
+    }
+}
 
 const actions = (state = {}, action) => {
     const { type, payload } = action;
@@ -57,11 +85,13 @@ const actions = (state = {}, action) => {
     }
 }
 
-const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = combineReducers({
     reducer,
     reducer2,
+    reducer3,
+    reducer4,
     actions
 })
 
